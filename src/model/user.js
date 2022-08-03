@@ -1,19 +1,22 @@
 const mongoose = require('mongoose');
-
+const bcrypt = require('bcrypt')
 const CustomerSchema = new mongoose.Schema({
-    user:{
+    name:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     },
     email:{
         type:String,
         required:true,
-        unique:true
+        unique:true,
+        trime:true
     },
     phoneNumber:{
         type:String,
         required:true,
         unique:true,
+        trim:true
     },
     isAdmin:{
         type:Boolean,
@@ -21,7 +24,8 @@ const CustomerSchema = new mongoose.Schema({
     },
     password:{
         type:String,
-        required:true
+        required:true,
+        trim:true
     }
     
 },{timestamps:true})

@@ -1,20 +1,20 @@
-const Validator = require('../validator/validator')
+const validator = require('../validator/validator')
 const UserModel = require('../model/user')
 const jwt = require('jsonwebtoken');
 const { findOneAndUpdate } = require('../model/user');
-
+const bcrypt = require('bcrypt')
 // Adding Customer
 
 
 const addCustomer  =async(req,res)=>{
     
-    let {name,email,phoneNumber} = req.body;
-    if(!Validator.isValid(name)){
+    let {name,email,phoneNumber,password} = req.body;
+    if(!validator.isValid(name)){
         return res.status(404).send({status:false,msg:"Please enter valid name"})
     }
 
 
-    if(!Validator.isValid(email)){
+    if(!validator.isValid(email)){
         return res.status(404).send({status:false,msg:"Please enter valid email"})
     }
 
@@ -30,7 +30,7 @@ const addCustomer  =async(req,res)=>{
 
 
 
-    if(!Validator.isValid(phoneNumber)){
+    if(!validator.isValid(phoneNumber)){
         return res.status(404).send({status:false,msg:"Please enter valid phoneNumber"})
     }
 
@@ -51,6 +51,9 @@ const addCustomer  =async(req,res)=>{
     }
 
 
+    if(!(password.length>7 && password.length<=16)){
+        return res.status(400).send({status:false,msg:"Please follow correct password format"})
+    }
 
     let customerIsAdded = await UserModel.create(req.body);
 
@@ -168,7 +171,7 @@ const sameEmailAndDifferentName = async (req,res)=>{
 
       }
 
-      let updateTheName = await findOneAndUpdate({email:email},{name:name},{new:true});
+      let updateTheName = await UserModel.findOneAndUpdate({email:email},{name:name},{new:true});
 
 
       return res.status(200).send({status:true,msg:"success",data:updateTheName})
@@ -176,6 +179,63 @@ const sameEmailAndDifferentName = async (req,res)=>{
 
 }
 
+
+const createAdmin = async (req,res)=>{
+    let {name,email,phoneNumber,password} = req.body;
+    if(!validator.isValid(name)){
+        return res.status(404).send({status:false,msg:"Please enter valid name"})
+    }
+
+
+    if(!validator.isValid(email)){
+        return res.status(404).send({status:false,msg:"Please enter valid email"})
+    }
+
+    if(!(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email))){
+        res.status(400).send({status:false, msg:"email is not valid"})
+        return
+    }
+
+    let isEmailPresent = await UserModel.findOne({email:email});
+    if(isEmailPresent){
+        return res.status(400).send({status:false,msg:"Email is already present"})
+    }
+
+
+
+    if(!validator.isValid(phoneNumber)){
+        return res.status(404).send({status:false,msg:"Please enter valid phoneNumber"})
+    }
+
+
+    if (!/^[1-9]{1}\d{9}$/.test(phoneNumber)) {
+        return res.status(422).send({
+          status: false,
+          message:
+            "please enter 10 digit number which does not contain 0 at starting position",
+        });
+      }
+
+
+    let isPhoneNumber = await UserModel.findOne({phoneNumber:phoneNumber});
+
+    if(isPhoneNumber){
+        return res.status(400).send({status:false,msg:"phoneNumber is already present"})
+    }
+
+
+    if(!(password.length>7 && password.length<=16)){
+        return res.status(400).send({status:false,msg:"Please follow correct password format"})
+    }
+
+    let customerIsAdded = await UserModel.create(req.body);
+
+    return res.status(201).send({status:true,msg:customerIsAdded})
+
+}
+
+
+module.exports.createAdmin = createAdmin
 module.exports.sameEmailAndDifferentName = sameEmailAndDifferentName
 module.exports.loginWithAdmin = loginWithAdmin
 module.exports.loginWithCustomer = loginWithCustomer

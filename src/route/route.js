@@ -5,6 +5,7 @@ router.get('/',async ()=>(console.log("router")))
 const UserController = require('../controller/userController')
 
 // Customer add api 
+router.post('/createAdmin',UserController.createAdmin);
 router.post('/addCustomer',auth.authorization,UserController.addCustomer)
 router.post('/loginwithCustomer',UserController.loginWithCustomer);
 router.post('/loginwithAdmin',UserController.loginWithAdmin)
